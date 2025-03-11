@@ -9,7 +9,7 @@ export async function pupTest() {
   const settings = Setting.getInstance();
 
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     // devtools: true,
     executablePath:
       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -18,14 +18,34 @@ export async function pupTest() {
   await page.setUserAgent(UA);
 
   const loginUrl = `http://${routerIp}/login`;
-  await page.goto(loginUrl);
+  let newPageResp: any = null;
+  try {
+    newPageResp = await page.goto(loginUrl);
+  } catch (e) {
+    console.error(e);
+  }
 
+  if (!newPageResp) {
+    await browser.close();
+  }
+  if (newPageResp !== null) {
+    const status = await newPageResp.status();
+    console.log({ status });
+    if (status !== 200) {
+      await browser.close();
+    }
+  }
+  console.log("newPageResp", newPageResp);
   await page.setViewport({ width: 1080, height: 1024 });
-  const hrefs = await page.evaluate(() =>
-    Array.from(document.querySelectorAll("a[href]"), (a) =>
-      a.getAttribute("href"),
-    ),
-  );
+  let hrefs: any[] = [];
+  try {
+    hrefs = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("a[href]"), (a) =>
+        a.getAttribute("href"),
+      ),
+    );
+  } catch (e) {}
+
   let loginUrlFound = false;
   let newLoginUrl = "";
   const loginUrlPattern = "http://alia.net/login?dst=&username=";

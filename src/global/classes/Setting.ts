@@ -31,7 +31,7 @@ export class Setting {
     if (!this.loaded || noCache) {
       await this.init();
     }
-    console.log({ data: this.data });
+    // console.log({ data: this.data });
     return this.data[key as keyof ISettingData];
   }
 
