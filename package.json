@@ -1,0 +1,25 @@
+{
+  "name": "mach-changer",
+  "version": "1.0.0",
+  "description": "Run ip changer every 5 minutes then access free billings",
+  "main": "src/main.ts",
+  "scripts": {
+    "dev": "vite-node src/main.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
+  "dependencies": {
+    "node-powershell": "^5.0.1",
+    "puppeteer": "^24.4.0",
+    "puppeteer-core": "^24.4.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1",
+    "vite-node": "^3.0.8",
+    "vitest": "^3.0.8"
+  }
+}
