@@ -15,7 +15,7 @@ const main = async () => {
   // const lastWifiMacAddr = await settings.get("lastWifiMacAddr");
   // console.log({ lastWifiMacAddr });
   // await pupTest();
-  await waitForMacChanges(5000, async (macAddr: any) => {
+  await waitForMacChanges(3000, async (macAddr: any) => {
     console.log("Mac Changed", macAddr);
     try {
       await pupTest();
