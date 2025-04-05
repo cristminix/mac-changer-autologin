@@ -3,16 +3,16 @@ import * as process from "node:process";
 import { Setting } from "@/global/classes";
 const UA = process.env.UA as string;
 const routerIp = process.env.ROUTER_IP as string;
-
+const hostspotLoginUrlPattern = process.env.HOTSPOT_LOGIN_URL_PATTERN;
 export async function pupTest() {
   console.log(`pupTest()`);
   const settings = Setting.getInstance();
 
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     // devtools: true,
-    executablePath:
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    executablePath: "/opt/google/chrome/chrome",
+    // "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
   });
   const page = await browser.newPage();
   await page.setUserAgent(UA);
@@ -48,7 +48,7 @@ export async function pupTest() {
 
   let loginUrlFound = false;
   let newLoginUrl = "";
-  const loginUrlPattern = "http://alia.net/login?dst=&username=";
+  const loginUrlPattern = hostspotLoginUrlPattern;
   let macAddrFound = "";
   if (hrefs.length > 1) {
     for (const href of hrefs) {

@@ -1,11 +1,15 @@
 import { getCurrentWifiMacAddr } from "@/global/fn/getCurrentWifiMacAddr";
 import { Setting } from "@/global/classes";
 
-export async function waitForMacChanges(timeout = 1000, callback: any) {
+export async function waitForMacChanges(
+  timeout = 1000,
+  netIfaceName: string,
+  callback: any,
+) {
   const settings = Setting.getInstance();
 
   setInterval(async () => {
-    const currentWifiMacAddr = getCurrentWifiMacAddr();
+    const currentWifiMacAddr = getCurrentWifiMacAddr(netIfaceName);
     const lastWifiMacAddr = await settings.get("lastWifiMacAddr");
     // console.log({ lastWifiMacAddr, currentWifiMacAddr });
 

@@ -1,9 +1,9 @@
 import os from "os";
-export function getCurrentWifiMacAddr() {
+export function getCurrentWifiMacAddr(netIfaceName: string) {
   const networkInterfaces = os.networkInterfaces();
   let macAddr = "";
   // Find the WiFi adapter by name
-  const wifiInterface = networkInterfaces["Wi-Fi"];
+  const wifiInterface = networkInterfaces[netIfaceName];
 
   if (wifiInterface) {
     // Find the first IPv4 entry (usually has the MAC address)
