@@ -9,12 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "GPL",
-  "dependencies": {
-    
-
-  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.19",
     "typescript": "^5.8.2",
     "vite": "^6.2.1",
     "vite-node": "^3.0.8",

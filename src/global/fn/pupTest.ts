@@ -1,14 +1,8 @@
 import * as process from "node:process";
 import { Setting } from "@/global/classes";
-const UA = process.env.UA as string;
 const routerIp = process.env.ROUTER_IP as string;
-const hostspotLoginUrlPattern = process.env.HOTSPOT_LOGIN_URL_PATTERN;
-import { isInternetConnected } from "@/global/fn/isInternetConnected";
 import { convertMacToUrl } from "@/global/fn/convertMacToUrl";
 import { fetchWithTimeout } from "@/global/fn/fetchWithTimeout";
-
-
-
 
 export async function pupTest(macAddr:string) {
   if(macAddr.length<1)
@@ -23,8 +17,7 @@ export async function pupTest(macAddr:string) {
   } catch (e) {
     console.error(e);
   }
-  console.log(finalUrl)
-  let connected = false
+  console.log(finalUrl,newPageResp)
   if (newPageResp !== null) {
         await settings.set("lastWifiMacAddr", macAddr);
   }
