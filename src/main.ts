@@ -3,9 +3,10 @@ import {
 } from "@/global/fn";
 import * as process from "node:process";
 import { waitForMacChanges } from "@/global/fn/waitForMacChanges";
-const networkInterfaceName = process.env.NETWORK_IFACE_NAME as string;
-
-
+let networkInterfaceName = process.env.NETWORK_IFACE_NAME as string;
+if (process.platform === "win32") {
+  networkInterfaceName = process.env.NETWORK_IFACE_NAME_WIN as string;
+}
 const main = async () => {
 
   let pupIsRunning = false;
