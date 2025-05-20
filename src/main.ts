@@ -8,6 +8,13 @@ import * as process from "node:process";
 import { Setting } from "@/global/classes";
 import { waitForMacChanges } from "@/global/fn/waitForMacChanges";
 const networkInterfaceName = process.env.NETWORK_IFACE_NAME as string;
+const routerIp = process.env.ROUTER_IP as string;
+
+// async function getStatus(){
+//   const statusUrl = `http://${routerIp}/status`;
+//   const responseText = await fetch(statusUrl).then(r=>r.text())
+//   console.log({responseText})
+// }
 const main = async () => {
   // pupHttpBin()
   // getCurrentWifiMacAddr();
@@ -21,10 +28,11 @@ const main = async () => {
     if (!pupIsRunning) {
       try {
         pupIsRunning = true;
-        await pupTest();
+        await pupTest(macAddr);
         pupIsRunning = false;
       } catch (e) {
         console.error(e);
+        // await getStatus()
         pupIsRunning = false;
       }
     } else {

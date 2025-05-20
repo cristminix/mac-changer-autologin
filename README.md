@@ -6,6 +6,7 @@ pnpm dev
 ```
 
 Run as administrator on Windows
+please install TMac app 
 ```aiignore
 change-mac.cmd
 ```
