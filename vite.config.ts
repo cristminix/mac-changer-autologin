@@ -1,7 +1,6 @@
 import { defineConfig } from "vite"
 import path from "node:path"
 
-
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
@@ -16,9 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@tools": path.resolve(__dirname, "./tools"),
     },
   },
-  plugins: [
-
-  ],
+  plugins: [],
 })
