@@ -1,7 +1,7 @@
 import process from "node:process";
 import { loadJsonFromFile, saveJsonObjectToFile } from "@/global/fn";
 
-const jsonSettingsFilePath = process.env.SETTINGS_JSON_PATH as string;
+const jsonSettingsFilePath = process.env.SETTINGS_JSON_PATH as string ?? "settings.json";
 export interface ISettingData {
   lastWifiMacAddr: string;
 }

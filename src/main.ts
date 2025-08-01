@@ -7,6 +7,7 @@ let networkInterfaceName = process.env.NETWORK_IFACE_NAME as string;
 if (process.platform === "win32") {
   networkInterfaceName = process.env.NETWORK_IFACE_NAME_WIN as string;
 }
+// console.log(process.env)
 const main = async () => {
 
   let pupIsRunning = false;

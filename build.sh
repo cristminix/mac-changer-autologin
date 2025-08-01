@@ -1,0 +1,1 @@
+pnpx esbuild --bundle src/main.ts --outfile=out.js --define:RELEASE=true --platform=node
