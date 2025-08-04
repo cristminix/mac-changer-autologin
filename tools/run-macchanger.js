@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { getUnusedMacAddresses, markMacAsUsed } = require('./mac-database');
+const { getUnusedMacAddresses, markMacAsUsed, getMacAddressesByStatus } = require('./mac-database');
 
 // Interface jaringan yang digunakan
 const INTERFACE = 'wlp0s20f3';
@@ -85,13 +85,44 @@ async function runMacChanger() {
             markMacAsUsed(macToUse.mac_address);
             console.log(`[INFO] Alamat MAC ${macToUse.mac_address} telah ditandai sebagai sudah digunakan`);
 
-            // Tunggu selama 5 menit (300.000 milidetik)
+            // Tunggu sampai status alamat MAC berubah menjadi connected atau banned
+            console.log('[INFO] Menunggu status alamat MAC berubah menjadi connected atau banned...');
+            let macStatus = null;
+            while (true) {
+                // Tunggu 1 detik
+                await sleep(1000);
+
+                // Periksa apakah alamat MAC ada di daftar connected
+                const connectedMacs = getMacAddressesByStatus('connected');
+                const connectedMac = connectedMacs.find(mac => mac.mac_address === macToUse.mac_address);
+                if (connectedMac) {
+                    macStatus = 'connected';
+                    break;
+                }
+
+                // Periksa apakah alamat MAC ada di daftar banned
+                const bannedMacs = getMacAddressesByStatus('banned');
+                const bannedMac = bannedMacs.find(mac => mac.mac_address === macToUse.mac_address);
+                if (bannedMac) {
+                    macStatus = 'banned';
+                    break;
+                }
+            }
+
+            // Jika statusnya banned, lanjutkan ke iterasi berikutnya
+            if (macStatus === 'banned') {
+                console.log(`[INFO] Alamat MAC ${macToUse.mac_address} dibanned. Melanjutkan ke alamat MAC berikutnya.`);
+                continue;
+            }
+
+            // Jika statusnya connected, tunggu selama 5 menit (300.000 milidetik)
             console.log('[INFO] Menunggu 5 menit sebelum mengganti alamat MAC lagi...');
             await sleep(300000);
         } catch (error) {
             console.error('[ERROR] Terjadi kesalahan:', error.message);
             // Tunggu sebentar sebelum mencoba lagi
-            await sleep(5000);
+            // await sleep(5000);
+            break
         }
     }
 }

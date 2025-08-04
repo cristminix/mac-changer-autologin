@@ -16,7 +16,7 @@ export async function fetchHotspotLogin(macAddr: string) {
   } catch (e) {
     console.error(e)
   }
-  console.log(finalUrl, newPageResp)
+  // console.log(finalUrl, newPageResp)
   if (newPageResp !== null) {
     await settings.set("lastWifiMacAddr", macAddr)
   }

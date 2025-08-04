@@ -17,11 +17,27 @@ function createTable() {
       mac_address TEXT UNIQUE NOT NULL,
       already_use INTEGER DEFAULT 0, -- 0 for false, 1 for true
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      connected_at DATETIME NULL,
+      status TEXT DEFAULT 'connecting' -- connecting, connected, banned
     )
   `;
 
   db.exec(createTableSQL);
+
+  // Add connected_at column if it doesn't exist (for existing databases)
+  try {
+    db.exec('ALTER TABLE mac_addresses ADD COLUMN connected_at DATETIME NULL');
+  } catch (err) {
+    // Column might already exist, ignore error
+  }
+
+  // Add status column if it doesn't exist (for existing databases)
+  try {
+    db.exec("ALTER TABLE mac_addresses ADD COLUMN status TEXT DEFAULT 'connecting'");
+  } catch (err) {
+    // Column might already exist, ignore error
+  }
 
   // Create an index on mac_address for faster lookups
   const createIndexSQL = `
@@ -62,6 +78,9 @@ function saveMacAddresses(macAddresses) {
  * @returns {Object[]} Array of MAC address objects
  */
 function getAllMacAddresses() {
+  // Ensure the table structure is up to date
+  createTable();
+
   const selectSQL = `SELECT * FROM mac_addresses`;
   return db.prepare(selectSQL).all();
 }
@@ -71,6 +90,9 @@ function getAllMacAddresses() {
  * @returns {Object[]} Array of unused MAC address objects
  */
 function getUnusedMacAddresses() {
+  // Ensure the table structure is up to date
+  createTable();
+
   const selectSQL = `SELECT * FROM mac_addresses WHERE already_use = ?`;
   return db.prepare(selectSQL).all(0); // 0 represents false in SQLite
 }
@@ -80,9 +102,12 @@ function getUnusedMacAddresses() {
  * @param {string} macAddress - The MAC address to mark as used
  */
 function markMacAsUsed(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
   const updateSQL = `
-    UPDATE mac_addresses 
-    SET already_use = ?, updated_at = CURRENT_TIMESTAMP 
+    UPDATE mac_addresses
+    SET already_use = ?, updated_at = CURRENT_TIMESTAMP
     WHERE mac_address = ?
   `;
 
@@ -95,6 +120,9 @@ function markMacAsUsed(macAddress) {
  * @param {string} macAddress - The MAC address to mark as unused
  */
 function markMacAsUnused(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
   const updateSQL = `
     UPDATE mac_addresses
     SET already_use = ?, updated_at = CURRENT_TIMESTAMP
@@ -105,6 +133,91 @@ function markMacAsUnused(macAddress) {
   updateStmt.run(0, macAddress); // 0 represents false in SQLite
 }
 
+/**
+ * Mark a MAC address as connecting
+ * @param {string} macAddress - The MAC address to mark as connecting
+ */
+function markMacAsConnecting(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const updateSQL = `
+    UPDATE mac_addresses
+    SET status = 'connecting', updated_at = CURRENT_TIMESTAMP
+    WHERE mac_address = ?
+  `;
+
+  const updateStmt = db.prepare(updateSQL);
+  updateStmt.run(macAddress);
+}
+
+/**
+ * Mark a MAC address as connected and set the connection time
+ * @param {string} macAddress - The MAC address to mark as connected
+ */
+function markMacAsConnected(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const updateSQL = `
+    UPDATE mac_addresses
+    SET status = 'connected', connected_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+    WHERE mac_address = ?
+  `;
+
+  const updateStmt = db.prepare(updateSQL);
+  updateStmt.run(macAddress);
+}
+
+/**
+ * Mark a MAC address as disconnected and clear the connection time
+ * @param {string} macAddress - The MAC address to mark as disconnected
+ */
+function markMacAsDisconnected(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const updateSQL = `
+    UPDATE mac_addresses
+    SET connected_at = NULL, updated_at = CURRENT_TIMESTAMP
+    WHERE mac_address = ?
+  `;
+
+  const updateStmt = db.prepare(updateSQL);
+  updateStmt.run(macAddress);
+}
+
+/**
+ * Mark a MAC address as banned
+ * @param {string} macAddress - The MAC address to mark as banned
+ */
+function markMacAsBanned(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const updateSQL = `
+    UPDATE mac_addresses
+    SET status = 'banned', updated_at = CURRENT_TIMESTAMP
+    WHERE mac_address = ?
+  `;
+
+  const updateStmt = db.prepare(updateSQL);
+  updateStmt.run(macAddress);
+}
+
+/**
+ * Get MAC addresses by status
+ * @param {string} status - The status to filter by (connecting, connected, banned)
+ * @returns {Object[]} Array of MAC address objects
+ */
+function getMacAddressesByStatus(status) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const selectSQL = `SELECT * FROM mac_addresses WHERE status = ?`;
+  return db.prepare(selectSQL).all(status);
+}
+
 // Export functions
 module.exports = {
   createTable,
@@ -112,5 +225,10 @@ module.exports = {
   getAllMacAddresses,
   getUnusedMacAddresses,
   markMacAsUsed,
-  markMacAsUnused
+  markMacAsUnused,
+  markMacAsConnecting,
+  markMacAsConnected,
+  markMacAsDisconnected,
+  markMacAsBanned,
+  getMacAddressesByStatus
 };
