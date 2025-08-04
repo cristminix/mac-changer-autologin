@@ -80,3 +80,10 @@ export function markMacAsBanned(macAddress: string): void
 export function getMacAddressesByStatus(
   status: "connecting" | "connected" | "banned"
 ): MacAddress[]
+
+/**
+ * Get a MAC address by its address
+ * @param macAddress - The MAC address to search for
+ * @returns MAC address object or null if not found
+ */
+export function getMacAddressByAddress(macAddress: string): MacAddress | null

@@ -218,6 +218,19 @@ function getMacAddressesByStatus(status) {
   return db.prepare(selectSQL).all(status);
 }
 
+/**
+ * Get a MAC address by its address
+ * @param {string} macAddress - The MAC address to search for
+ * @returns {Object|null} MAC address object or null if not found
+ */
+function getMacAddressByAddress(macAddress) {
+  // Ensure the table structure is up to date
+  createTable();
+
+  const selectSQL = `SELECT * FROM mac_addresses WHERE mac_address = ?`;
+  return db.prepare(selectSQL).get(macAddress);
+}
+
 // Export functions
 module.exports = {
   createTable,
@@ -230,5 +243,6 @@ module.exports = {
   markMacAsConnected,
   markMacAsDisconnected,
   markMacAsBanned,
-  getMacAddressesByStatus
+  getMacAddressesByStatus,
+  getMacAddressByAddress
 };
