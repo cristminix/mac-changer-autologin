@@ -6,7 +6,8 @@
  */
 function generateMacAddresses() {
     const macs = [];
-    const base = ['68', '7a', '64', '06'];
+    // const base = ['68', '7a', '64', '06'];
+    const base = ['68', '7a', '65', '07'];
 
     for (let i = 0; i <= 0xFFFF; i++) {
         const xx1 = ((i >> 8) & 0xFF).toString(16).padStart(2, '0');

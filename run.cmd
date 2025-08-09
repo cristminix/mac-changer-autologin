@@ -1,2 +1,2 @@
-runas /user:Administrator "cmd /c change-mac.cmd"
+rem runas /user:Administrator "cmd /c change-mac.cmd"
 pnpm run dev
