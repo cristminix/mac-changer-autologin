@@ -26,7 +26,7 @@ const main = async () => {
       console.log("Mac Changed", macAddr)
       if (!pupIsRunning) {
         // Check if MAC address status is not equal to connected or banned
-        const macAddress = getMacAddressByAddress(macAddr)
+        const macAddress = await getMacAddressByAddress(macAddr)
         if (
           macAddress &&
           (macAddress.status === "connected" ||
@@ -52,7 +52,7 @@ const main = async () => {
             if (status === "connected") {
               console.log(`Login ${macAddr} SUCCESS`)
               // Update MAC address status to connected in database
-              markMacAsConnected(macAddr)
+              await markMacAsConnected(macAddr)
               // Show system notification for successful login
               notifier.notify({
                 title: "MAC Changer Auto Login",
@@ -64,15 +64,15 @@ const main = async () => {
             } else {
               console.log(`Login ${macAddr} GAGAL`)
               // Update MAC address status to banned in database
-              markMacAsBanned(macAddr)
+              await markMacAsBanned(macAddr)
               // Show system notification for failed login
-              notifier.notify({
-                title: "MAC Changer Auto Login",
-                message: `Login ${macAddr} GAGAL`,
-                // icon: path.join(__dirname, "..", "assets", "error.png"), // Optional icon
-                sound: true, // Only Notification Center or Windows Toasters
-                wait: false, // Wait with callback, until user action is taken against notification
-              })
+              // notifier.notify({
+              //   title: "MAC Changer Auto Login",
+              //   message: `Login ${macAddr} GAGAL`,
+              //   // icon: path.join(__dirname, "..", "assets", "error.png"), // Optional icon
+              //   sound: true, // Only Notification Center or Windows Toasters
+              //   wait: false, // Wait with callback, until user action is taken against notification
+              // })
             }
           }
           pupIsRunning = false

@@ -16,61 +16,61 @@ export interface MacAddress {
 /**
  * Create the mac_addresses table if it doesn't exist
  */
-export function createTable(): void
+export function createTable(): Promise<void>
 
 /**
  * Save MAC addresses to the database
  * @param macAddresses - Array of MAC addresses to save
  */
-export function saveMacAddresses(macAddresses: string[]): void
+export function saveMacAddresses(macAddresses: string[]): Promise<void>
 
 /**
  * Get all MAC addresses from the database
  * @returns Array of MAC address objects
  */
-export function getAllMacAddresses(): MacAddress[]
+export function getAllMacAddresses(): Promise<MacAddress[]>
 
 /**
  * Get unused MAC addresses from the database
  * @returns Array of unused MAC address objects
  */
-export function getUnusedMacAddresses(): MacAddress[]
+export function getUnusedMacAddresses(): Promise<MacAddress[]>
 
 /**
  * Mark a MAC address as used
  * @param macAddress - The MAC address to mark as used
  */
-export function markMacAsUsed(macAddress: string): void
+export function markMacAsUsed(macAddress: string): Promise<void>
 
 /**
  * Mark a MAC address as unused
  * @param macAddress - The MAC address to mark as unused
  */
-export function markMacAsUnused(macAddress: string): void
+export function markMacAsUnused(macAddress: string): Promise<void>
 
 /**
  * Mark a MAC address as connecting
  * @param macAddress - The MAC address to mark as connecting
  */
-export function markMacAsConnecting(macAddress: string): void
+export function markMacAsConnecting(macAddress: string): Promise<void>
 
 /**
  * Mark a MAC address as connected and set the connection time
  * @param macAddress - The MAC address to mark as connected
  */
-export function markMacAsConnected(macAddress: string): void
+export function markMacAsConnected(macAddress: string): Promise<void>
 
 /**
  * Mark a MAC address as disconnected and clear the connection time
  * @param macAddress - The MAC address to mark as disconnected
  */
-export function markMacAsDisconnected(macAddress: string): void
+export function markMacAsDisconnected(macAddress: string): Promise<void>
 
 /**
  * Mark a MAC address as banned
  * @param macAddress - The MAC address to mark as banned
  */
-export function markMacAsBanned(macAddress: string): void
+export function markMacAsBanned(macAddress: string): Promise<void>
 
 /**
  * Get MAC addresses by status
@@ -79,11 +79,11 @@ export function markMacAsBanned(macAddress: string): void
  */
 export function getMacAddressesByStatus(
   status: "connecting" | "connected" | "banned"
-): MacAddress[]
+): Promise<MacAddress[]>
 
 /**
  * Get a MAC address by its address
  * @param macAddress - The MAC address to search for
  * @returns MAC address object or null if not found
  */
-export function getMacAddressByAddress(macAddress: string): MacAddress | null
+export function getMacAddressByAddress(macAddress: string): Promise<MacAddress | null>

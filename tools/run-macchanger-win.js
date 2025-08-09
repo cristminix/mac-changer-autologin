@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { getUnusedMacAddresses, markMacAsUsed, getMacAddressesByStatus } = require('./mac-database');
+const { getUnusedMacAddresses, markMacAsUsed, getMacAddressesByStatus, getMacAddressByAddress } = require('./mac-database');
 
 // Interface jaringan yang digunakan
 const INTERFACE = 'Wi-Fi';
@@ -28,45 +28,22 @@ function execWithSpinner(cmd) {
     });
 }
 async function changeMacAddress(newMac) {
-    const stripped = newMac.replace(/:/g, '');
+    const stripped = newMac.toUpperCase();
     try {
-        await execWithSpinner(`powershell -Command "Set-NetAdapterAdvancedProperty -Name '${INTERFACE}' -RegistryValue '${stripped}' -DisplayName 'Network Address'"`);
+        console.log(`tmac -n "${INTERFACE}" -m ${stripped} -re -s`)
+        await execWithSpinner(`tmac -n "${INTERFACE}" -m ${stripped} -re -s`);
     } catch (err) {
-        console.warn('[!] Failed to set MAC using Set-NetAdapterAdvancedProperty, trying alternative method...');
-        try {
-            // Alternative method using registry
-            // Check if running as administrator
-            try {
-                await new Promise((resolve, reject) => {
-                    const child = spawn('net session', { stdio: 'ignore', shell: true });
-                    child.on('close', (code) => {
-                        if (code === 0) {
-                            resolve();
-                        } else {
-                            reject(new Error('Administrator privileges required'));
-                        }
-                    });
-                });
-            } catch (netErr) {
-                console.error('[×] Administrator privileges required for registry modification.');
-                console.error('[×] Please run this script as administrator.');
-                process.exit(1);
-            }
-            await execWithSpinner(`reg add "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e972-e325-11ce-bfc1-08002be10318}\\0001" /v NetworkAddress /d "${stripped}" /f`);
-        } catch (regErr) {
-            console.error('[×] Failed to set MAC using registry method.');
-            console.error('[×] Error:', regErr.message);
-            process.exit(1);
-        }
+        console.error('[!] Failed to set MAC using Set-NetAdapterAdvancedProperty,');
+
     }
-    try {
-        await execWithSpinner(`powershell -Command "Disable-NetAdapter -Name '${INTERFACE}' -Confirm:$false"`);
-        await execWithSpinner(`powershell -Command "Enable-NetAdapter -Name '${INTERFACE}' -Confirm:$false"`);
-    } catch (err) {
-        console.error('[×] Failed to disable/enable network adapter.');
-        console.error('[×] Error:', err.message);
-        process.exit(1);
-    }
+    // try {
+    //     await execWithSpinner(`powershell -Command "Disable-NetAdapter -Name '${INTERFACE}' -Confirm:$false"`);
+    //     await execWithSpinner(`powershell -Command "Enable-NetAdapter -Name '${INTERFACE}' -Confirm:$false"`);
+    // } catch (err) {
+    //     console.error('[×] Failed to disable/enable network adapter.');
+    //     console.error('[×] Error:', err.message);
+    //     process.exit(1);
+    // }
 }
 /**
  * Jalankan perintah untuk mengganti alamat MAC
@@ -130,7 +107,7 @@ async function runMacChanger() {
     while (true) {
         try {
             // Ambil satu alamat MAC yang belum digunakan
-            const unusedMacs = getUnusedMacAddresses();
+            const unusedMacs = await getUnusedMacAddresses();
 
             // Jika tidak ada alamat MAC yang tersedia, hentikan proses
             if (unusedMacs.length === 0) {
@@ -146,7 +123,6 @@ async function runMacChanger() {
             await changeMacAddress(macToUse.mac_address);
 
             // Tandai alamat MAC sebagai sudah digunakan
-            markMacAsUsed(macToUse.mac_address);
             console.log(`[INFO] Alamat MAC ${macToUse.mac_address} telah ditandai sebagai sudah digunakan`);
 
             // Tunggu sampai status alamat MAC berubah menjadi connected atau banned
@@ -155,20 +131,10 @@ async function runMacChanger() {
             while (true) {
                 // Tunggu 1 detik
                 await sleep(1000);
-
-                // Periksa apakah alamat MAC ada di daftar connected
-                const connectedMacs = getMacAddressesByStatus('connected');
-                const connectedMac = connectedMacs.find(mac => mac.mac_address === macToUse.mac_address);
-                if (connectedMac) {
-                    macStatus = 'connected';
-                    break;
-                }
-
-                // Periksa apakah alamat MAC ada di daftar banned
-                const bannedMacs = getMacAddressesByStatus('banned');
-                const bannedMac = bannedMacs.find(mac => mac.mac_address === macToUse.mac_address);
-                if (bannedMac) {
-                    macStatus = 'banned';
+                const record = await getMacAddressByAddress(macToUse.mac_address)
+                macStatus = record.status
+                console.log({ macStatus })
+                if (macStatus == 'banned' || macStatus == 'connected') {
                     break;
                 }
             }
@@ -182,6 +148,8 @@ async function runMacChanger() {
             // Jika statusnya connected, tunggu selama 5 menit (300.000 milidetik)
             console.log('[INFO] Menunggu 5 menit sebelum mengganti alamat MAC lagi...');
             await sleep(300000);
+            await markMacAsUsed(macToUse.mac_address);
+
         } catch (error) {
             console.error('[ERROR] Terjadi kesalahan:', error.message);
             // Tunggu sebentar sebelum mencoba lagi
