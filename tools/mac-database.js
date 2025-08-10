@@ -117,8 +117,8 @@ function getUnusedMacAddresses() {
       // Ensure the table structure is up to date
       createTable();
 
-      const selectSQL = `SELECT * FROM mac_addresses WHERE already_use = ? LIMIT 2`;
-      const result = db.prepare(selectSQL).all(0); // 0 represents false in SQLite
+      const selectSQL = `SELECT * FROM mac_addresses WHERE already_use = ? AND status != ? AND status != ? LIMIT 2`;
+      const result = db.prepare(selectSQL).all(0, 'connected', 'banned'); // 0 represents false in SQLite
       resolve(result);
     } catch (error) {
       reject(error);

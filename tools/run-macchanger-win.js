@@ -135,6 +135,8 @@ async function runMacChanger() {
                 macStatus = record.status
                 console.log({ macStatus })
                 if (macStatus == 'banned' || macStatus == 'connected') {
+                    await markMacAsUsed(macToUse.mac_address);
+
                     break;
                 }
             }
@@ -148,7 +150,6 @@ async function runMacChanger() {
             // Jika statusnya connected, tunggu selama 5 menit (300.000 milidetik)
             console.log('[INFO] Menunggu 5 menit sebelum mengganti alamat MAC lagi...');
             await sleep(300000);
-            await markMacAsUsed(macToUse.mac_address);
 
         } catch (error) {
             console.error('[ERROR] Terjadi kesalahan:', error.message);
