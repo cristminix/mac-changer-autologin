@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { getUnusedMacAddresses, markMacAsUsed, getMacAddressesByStatus } = require('./mac-database');
+const { getUnusedMacAddresses, markMacAsUsed, getMacAddressesByStatus, getMacAddressByAddress } = require('./mac-database');
 
 // Interface jaringan yang digunakan
 const INTERFACE = 'wlp0s20f3';
@@ -9,6 +9,34 @@ const INTERFACE = 'wlp0s20f3';
  * @param {string} macAddress - Alamat MAC yang akan digunakan
  * @returns {Promise} - Promise yang akan diselesaikan ketika proses selesai
  */
+function changeMacAddress_new(macAddress) {
+    return new Promise((resolve, reject) => {
+        console.log(`[INFO] Mengganti alamat MAC untuk interface ${INTERFACE} menjadi ${macAddress}`);
+
+        // Ganti alamat MAC
+        const changeProcess = spawn('macchanger', ['-m', macAddress, INTERFACE]);
+
+        changeProcess.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error(`Gagal mengganti alamat MAC: ${code}`));
+                return;
+            }
+
+            // Restart interface dengan ifdown dan ifup
+            const restartProcess = spawn('bash', ['-c', `ifdown ${INTERFACE} && ifup ${INTERFACE}`]);
+
+            restartProcess.on('close', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Gagal merestart interface: ${code}`));
+                    return;
+                }
+
+                console.log(`[INFO] Alamat MAC berhasil diubah menjadi ${macAddress}`);
+                resolve();
+            });
+        });
+    });
+}
 function changeMacAddress(macAddress) {
     return new Promise((resolve, reject) => {
         console.log(`[INFO] Mengganti alamat MAC untuk interface ${INTERFACE} menjadi ${macAddress}`);
@@ -66,7 +94,7 @@ async function runMacChanger() {
     while (true) {
         try {
             // Ambil satu alamat MAC yang belum digunakan
-            const unusedMacs = getUnusedMacAddresses();
+            const unusedMacs = await getUnusedMacAddresses();
 
             // Jika tidak ada alamat MAC yang tersedia, hentikan proses
             if (unusedMacs.length === 0) {
@@ -76,6 +104,7 @@ async function runMacChanger() {
 
             // Gunakan alamat MAC pertama yang tersedia
             const macToUse = unusedMacs[0];
+            console.log({ macToUse, unusedMacs })
             console.log(`[INFO] Menggunakan alamat MAC: ${macToUse.mac_address}`);
 
             // Jalankan perintah untuk mengganti alamat MAC
@@ -92,19 +121,12 @@ async function runMacChanger() {
                 // Tunggu 1 detik
                 await sleep(1000);
 
-                // Periksa apakah alamat MAC ada di daftar connected
-                const connectedMacs = getMacAddressesByStatus('connected');
-                const connectedMac = connectedMacs.find(mac => mac.mac_address === macToUse.mac_address);
-                if (connectedMac) {
-                    macStatus = 'connected';
-                    break;
-                }
+                const record = await getMacAddressByAddress(macToUse.mac_address)
+                macStatus = record.status
+                console.log({ macStatus })
+                if (macStatus == 'banned' || macStatus == 'connected') {
+                    await markMacAsUsed(macToUse.mac_address);
 
-                // Periksa apakah alamat MAC ada di daftar banned
-                const bannedMacs = getMacAddressesByStatus('banned');
-                const bannedMac = bannedMacs.find(mac => mac.mac_address === macToUse.mac_address);
-                if (bannedMac) {
-                    macStatus = 'banned';
                     break;
                 }
             }

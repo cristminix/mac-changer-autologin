@@ -54,13 +54,13 @@ const main = async () => {
               // Update MAC address status to connected in database
               await markMacAsConnected(macAddr)
               // Show system notification for successful login
-              notifier.notify({
-                title: "MAC Changer Auto Login",
-                message: `Login ${macAddr} SUCCESS`,
-                // icon: path.join(__dirname, "..", "assets", "success.png"), // Optional icon
-                sound: true, // Only Notification Center or Windows Toasters
-                wait: false, // Wait with callback, until user action is taken against notification
-              })
+              // notifier.notify({
+              //   title: "MAC Changer Auto Login",
+              //   message: `Login ${macAddr} SUCCESS`,
+              //   // icon: path.join(__dirname, "..", "assets", "success.png"), // Optional icon
+              //   sound: true, // Only Notification Center or Windows Toasters
+              //   wait: false, // Wait with callback, until user action is taken against notification
+              // })
             } else {
               console.log(`Login ${macAddr} GAGAL`)
               // Update MAC address status to banned in database
